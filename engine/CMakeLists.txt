@@ -1,5 +1,5 @@
 set(ZF_ENGINE_SOURCES src/pool.c src/kernels.c src/dot.c src/conv.c src/layout.c src/block.c src/zfw.c src/frontend.c src/layer.c src/decode.c src/zf_libm.c src/fbank.c src/resample.c src/vfs.c src/sha256.c src/zfs.c src/neon_emu_trace.c
-    ${zipformer_sdk_SOURCE_DIR}/third_party/kissfft/kiss_fft.c ${zipformer_sdk_SOURCE_DIR}/third_party/kissfft/kiss_fftr.c)
+    ${tajweedformer_sdk_SOURCE_DIR}/third_party/kissfft/kiss_fft.c ${tajweedformer_sdk_SOURCE_DIR}/third_party/kissfft/kiss_fftr.c)
 if(ANDROID_ABI STREQUAL "armeabi-v7a")
   # Hand-scheduled microkernels for the A53's in-order NEON pipeline.
   list(APPEND ZF_ENGINE_SOURCES src/kernels_armv7.S)
@@ -7,7 +7,7 @@ endif()
 
 add_library(zf_engine STATIC ${ZF_ENGINE_SOURCES})
 target_include_directories(zf_engine PUBLIC include)
-target_include_directories(zf_engine PRIVATE ${zipformer_sdk_SOURCE_DIR}/third_party/kissfft)
+target_include_directories(zf_engine PRIVATE ${tajweedformer_sdk_SOURCE_DIR}/third_party/kissfft)
 target_compile_options(zf_engine PRIVATE $<$<COMPILE_LANGUAGE:C>:-O3 -Wall -Wextra -Werror>)
 # vendored third-party code (optimized-routines): its own style, so no -Werror on it
 set_source_files_properties(src/zf_libm.c PROPERTIES COMPILE_OPTIONS "-w")
@@ -19,8 +19,8 @@ if(CMAKE_C_COMPILER_ID MATCHES "Clang")
 else()
   set(ZF_NO_VECTORIZE "-fno-tree-vectorize;-fno-tree-slp-vectorize")
 endif()
-set_source_files_properties(src/fbank.c ${zipformer_sdk_SOURCE_DIR}/third_party/kissfft/kiss_fft.c
-                            ${zipformer_sdk_SOURCE_DIR}/third_party/kissfft/kiss_fftr.c
+set_source_files_properties(src/fbank.c ${tajweedformer_sdk_SOURCE_DIR}/third_party/kissfft/kiss_fft.c
+                            ${tajweedformer_sdk_SOURCE_DIR}/third_party/kissfft/kiss_fftr.c
                             PROPERTIES COMPILE_OPTIONS "-w;${ZF_NO_VECTORIZE}")
 # The resampler, for the same reason (see zf/resample.h); it is our own code, so it keeps -Werror.
 set_source_files_properties(src/resample.c PROPERTIES COMPILE_OPTIONS "${ZF_NO_VECTORIZE}")

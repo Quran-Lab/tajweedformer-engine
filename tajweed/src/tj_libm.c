@@ -2,7 +2,7 @@
  * the phoneme engine (research/phoneme-engine/c/src/pe_libm.c, pe_ names changed to zf_tj_), with its notices:
  *
  * exp and log are ARM optimized-routines (2018) and log1p is fdlibm, as musl ships them, built the
- * way zipformer-sdk's zf_libm builds its float functions: no FMA, no rounding intrinsics, double_t
+ * way tajweedformer-sdk's zf_libm builds its float functions: no FMA, no rounding intrinsics, double_t
  * = double, no errno and no exception signalling. Every step is one IEEE double operation with one
  * rounding, so x86-64, ARMv7, AArch64 and WebAssembly give the same bits (with /fp:precise or
  * -ffp-contract=off). Against the platform libm they differ by at most one ulp.

@@ -198,7 +198,7 @@ static int zf_env_int(const char *name, int fallback) {
  * Cutting the tasks smaller does not make a descheduled thread come back sooner, but it bounds what
  * it is holding. With one task a thread the team waits for a quarter of the region; with four tasks
  * a thread the other three finish the rest and wait only for the one small task that stalled. */
-/* tasks a thread in a linear's region; a build can choose (zipformer-wasm: more, smaller items, so
+/* tasks a thread in a linear's region; a build can choose (tajweedformer-wasm: more, smaller items, so
  * a descheduled thread's share is picked up by the others) */
 #ifndef ZF_TASK_MULT_DEFAULT
 #define ZF_TASK_MULT_DEFAULT 1

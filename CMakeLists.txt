@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.24)
-project(zipformer_sdk DESCRIPTION "TajweedFormer engine: the exact runtime and the tajweed scorer" LANGUAGES C CXX ASM)
+project(tajweedformer_sdk DESCRIPTION "TajweedFormer engine: the exact runtime and the tajweed scorer" LANGUAGES C CXX ASM)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)

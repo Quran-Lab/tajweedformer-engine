@@ -99,7 +99,7 @@ int zf_kernels_variant(void);
 void zf_linear_s8(const int8_t *a, int m, int lda, const ZfWeightsS8 *w, int a_zero_point,
                   int32_t *out, int ldc);
 
-/* The int8 accelerator hook (weak in kernels.c, which declines; zipformer-native links a strong
+/* The int8 accelerator hook (weak in kernels.c, which declines; tajweedformer-native links a strong
  * one). Rows [row_begin, row_end) of `a` against unit blocks [block_begin, block_end), written to
  * out[i * ldc + j - j_shift] as the exact int32 above; returns 1 if it did, 0 to decline. Not called
  * on ARMv7, whose assembly scales in its own epilogue. */

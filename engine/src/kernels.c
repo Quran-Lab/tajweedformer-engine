@@ -391,7 +391,7 @@ static inline void store_units(int32_t *dst, int32x4_t v, int valid) {
 /* `yf` is where the scaled result goes when the caller wants float straight out of the kernel; it
  * is null for the int32 form the front end's transposing scale needs. */
 #if !ZF_HAVE_ASM
-/* A host's own int8 kernel (zipformer-native's AVX-512 VNNI): it fills `out` with exactly the int32
+/* A host's own int8 kernel (tajweedformer-native's AVX-512 VNNI): it fills `out` with exactly the int32
  * the code below would, for rows [row_begin, row_end) and unit blocks [block_begin, block_end) with
  * columns shifted left by `j_shift`, and returns 1; or returns 0 and the code below runs. Integer
  * arithmetic, so it cannot move a bit; this weak default declines. Offered only where the kernel

@@ -1662,7 +1662,7 @@ static OrtStatus *read_processed(const OrtApi *api, const OrtValue *value, long 
   return NULL;
 }
 
-/* chunks a lockstep group (a build can choose: zipformer-wasm measures best with 4) */
+/* chunks a lockstep group (a build can choose: tajweedformer-wasm measures best with 4) */
 #ifndef ZF_LANES_DEFAULT
 #define ZF_LANES_DEFAULT 8
 #endif

@@ -19,9 +19,8 @@ One model, one engine, the same bits on every platform. Each SDK compiles the sa
 | [tajweedformer-c](https://github.com/Quran-Lab/tajweedformer-c) | C API and server runner with x86 int8 kernels (AVX2, AVX-VNNI, AVX-512 VNNI) | Windows, Linux (x86-64) | CMake (`add_subdirectory`) |
 | [tajweedformer-engine](https://github.com/Quran-Lab/tajweedformer-engine) | The engine: exact C runtime, tajweed scorer, conformance suite | everything above | Git submodule |
 
-The model, Quran-Lab/tajweedformer-v4 (`sdk/v4.0`), will be published on Hugging Face (gated: you accept its
-licence there) and mirrored by `cdn.quranlab.ai`. Until it is, the SDKs build and their tests run, but there is
-no model to download yet. SDK 2.0.0 runs V4 only.
+The model, Quran-Lab/tajweedformer-v4 (`sdk/v4.0`), is on Hugging Face (gated: you accept its licence there)
+and mirrored by `cdn.quranlab.ai`. SDK 2.0.0 runs V4 only.
 Every release's binaries (the AAR and POM, the XCFramework zips, the npm package, the native archives) are
 also on `https://cdn.quranlab.ai/sdk/<product>/<version>/`, with a `SHA256SUMS` file, served from six regions.
 [portal.quranlab.ai](https://portal.quranlab.ai) is where you create an app, get its developer key,
@@ -32,7 +31,7 @@ thresholds) your users see, without shipping a new build.
 
 | Folder | What it is |
 | - | - |
-| `engine/` | The model runtime: int8 matrix kernels, convolutions, the Zipformer layers, the fbank front end and the resampler. ARMv7 NEON arithmetic everywhere: native on ARM, emulated bit for bit (`zf/neon_emu.h`) elsewhere. |
+| `engine/` | The model runtime: int8 matrix kernels, convolutions, the TajweedFormer layers, the fbank front end and the resampler. ARMv7 NEON arithmetic everywhere: native on ARM, emulated bit for bit (`zf/neon_emu.h`) elsewhere. |
 | `accel/` | The graph runner (`zf_rt`) and the streaming API, `accel/include/zf/stream.h`: audio or features in, every output of every chunk out. |
 | `tajweed/` | The tajweed library, `tajweed/include/zf_tajweed.h`: opens a V4 model folder, streams audio, keeps every head, resolves the tajweed settings (app code, then the portal, then the model's calibration) and scores a recitation of a known ayah into per-site verdicts. Portable C11, no dependencies. |
 | `bench/` | The conformance harnesses and `bench/v4_conformance.sh`. |
@@ -106,7 +105,7 @@ against the exact engine, never the other way round.
 ```sh
 cmake --preset host-dev && cmake --build --preset host-dev
 scripts/fetch-conformance-data.sh data          # the 35 clips (this repository's release assets)
-# the model folder sdk/v4.0 from Hugging Face, once it is published (gated: accept the licence first)
+# the model folder sdk/v4.0 from Hugging Face (gated: accept the licence first)
 huggingface-cli download Quran-Lab/tajweedformer-v4 --include "sdk/v4.0/*" --local-dir hf
 bench/v4_conformance.sh build/host-dev hf/sdk/v4.0 data
 ```

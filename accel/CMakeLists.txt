@@ -1,6 +1,6 @@
 # The ONNX Runtime C API headers: this checkout's third_party, or the including project's when the
 # engine is built as a subproject (the wrappers keep a copy in their own third_party).
-set(ONNXRUNTIME_HEADERS "${zipformer_sdk_SOURCE_DIR}/third_party/onnxruntime/include")
+set(ONNXRUNTIME_HEADERS "${tajweedformer_sdk_SOURCE_DIR}/third_party/onnxruntime/include")
 if(NOT EXISTS "${ONNXRUNTIME_HEADERS}/onnxruntime_c_api.h")
   set(ONNXRUNTIME_HEADERS "${CMAKE_SOURCE_DIR}/third_party/onnxruntime/include")
 endif()

@@ -1,4 +1,4 @@
-/* zf_zfs_materialize: see zf/zfs.h. The format is documented in zipformer-coreml's zfs_pack.py. */
+/* zf_zfs_materialize: see zf/zfs.h. The format is documented in tajweedformer-coreml's zfs_pack.py. */
 #include "zf/zfs.h"
 
 #include <errno.h>
