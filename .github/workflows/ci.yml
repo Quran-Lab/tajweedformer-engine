@@ -1,0 +1,66 @@
+name: CI
+
+# Every push: build the engine on Linux, macOS and Windows and run the tajweed library's own tests.
+# The V4 conformance (35 clips, every output of every chunk, bit for bit) also needs the model folder,
+# which is gated on Hugging Face: it runs when the repository has an HF_TOKEN secret from an account
+# that accepted the model's licence, and is skipped (with a notice) otherwise, for example on forks.
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-15, windows-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tools (Windows)
+        if: runner.os == 'Windows'
+        run: choco install ninja -y --no-progress
+      - name: Tools (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get install -y ninja-build
+      - name: Tools (macOS)
+        if: runner.os == 'macOS'
+        run: brew list ninja >/dev/null 2>&1 || brew install ninja
+      - name: Build
+        run: |
+          if [ "$RUNNER_OS" = Windows ]; then P=windows-mingw-dev; else P=host-dev; fi
+          echo "PRESET=$P" >> "$GITHUB_ENV"
+          cmake --preset $P
+          cmake --build --preset $P
+      - name: Release build (what an app links)
+        if: runner.os != 'Windows'
+        run: cmake --preset host-release && cmake --build --preset host-release
+      - name: Tajweed library tests
+        run: ctest --test-dir build/$PRESET --output-on-failure --no-tests=error
+      - name: Conformance data
+        id: data
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ -z "$HF_TOKEN" ]; then echo "::notice::no HF_TOKEN secret: V4 conformance skipped"; echo "run=0" >> "$GITHUB_OUTPUT"; exit 0; fi
+          scripts/fetch-conformance-data.sh data
+          python -m pip install -q "huggingface_hub>=0.24"
+          python - <<'PY'
+          import os
+          from huggingface_hub import snapshot_download
+          snapshot_download("Quran-Lab/tajweedformer-v4", allow_patterns=["sdk/v4.0/*"], local_dir="hf",
+                            token=os.environ["HF_TOKEN"])
+          PY
+          echo "run=1" >> "$GITHUB_OUTPUT"
+      - name: V4 conformance
+        if: steps.data.outputs.run == '1'
+        run: bench/v4_conformance.sh build/$PRESET hf/sdk/v4.0 data

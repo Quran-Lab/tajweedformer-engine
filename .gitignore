@@ -1,0 +1,9 @@
+build/
+build-*/
+out/
+data/
+__pycache__/
+*.onnx
+*.zfw
+*.zfg
+*.zfg.bin
