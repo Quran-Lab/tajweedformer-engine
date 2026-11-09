@@ -47,9 +47,6 @@ platform, or to check a build against the conformance suite.
 </tr>
 </table>
 
-<p align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/listen-dark.svg"><img alt="Illustration: the four words of Al-Fatihah 1:2 light up one by one as they are heard. Three get a check; the last is flagged: madd held too short." src="docs/listen-light.svg" width="100%"></picture></p>
-<p align="center"><sub>An illustration of what an app built on the engine can show while the learner recites. Each word lights up as it is heard, and the word to fix says why.</sub></p>
-
 ## Why TajweedFormer
 
 - **One source of truth.** Every SDK pins this repository as a submodule and compiles it, so iOS, Android, the web, Windows and Linux all run this code.
