@@ -4,7 +4,7 @@
 #   bench/v4_conformance.sh <dev build dir> <model folder> <data dir>
 #
 # <model folder> is sdk/v4.0's layout: calibration.json, tokens.txt, expected_tj3.zfx and one folder per
-# context (c16_l64, c24_l72, c24_l256) with the engine's files (tools/zfv4.py). <data dir> holds the 35
+# context (c16_l64, c8_l64, c24_l72, c24_l256) with the engine's files (tools/zfv4.py). <data dir> holds the 35
 # parity clips as feats/*.f32 and audio/*.pcm (conformance-data-2). The expected outputs are this
 # repository's conformance/v4_*_expected.jsonl. Exits nonzero if any line is short of 35/35.
 set -uo pipefail
@@ -27,7 +27,7 @@ check() { # name run expected [subset]
   printf '%-40s %s\n' "$1" "$r"
   case "$r" in 35/35*) ;; *) fails=$((fails + 1)) ;; esac
 }
-for c in c16_l64 c24_l72 c24_l256; do
+for c in c16_l64 c8_l64 c24_l72 c24_l256; do
   [ -d "$M/$c" ] || { echo "no $c in $M, skipped"; continue; }
   E=$HERE/../conformance/v4_${c}_expected.jsonl
   (cd "$M/$c" && ZF_FE_F32=1 ZF_CONV_ORT=1 "$B/zf_set_rt$EXE" model_engine2.onnx "$OUT/feats.txt" 4 "$OUT/set.jsonl" >/dev/null 2>&1)
@@ -67,6 +67,14 @@ for r in tj tjs; do
 ' "c16_l64 top-K, $([ $r = tj ] && echo all || echo scorer) heads" "topk_mismatch ${tk:-missing} (${th:-0} head rankings checked)"
   [ "${tk:-1}" = 0 ] && [ "${th:-0}" -gt 0 ] || fails=$((fails + 1))
 done
+# c8_l64 (160 ms) has its own audio reference (ONNX Runtime armv7, the c16_l64 recipe); only a folder that ships it runs these
+if [ -d "$M/c8_l64" ]; then
+  A8=$HERE/../conformance/v4_c8_l64_audio_expected.jsonl
+  (cd "$M/c8_l64" && "$B/zf_stream_check$EXE" model_engine2.onnx "$OUT/audio.txt" 4 "$OUT/au8.jsonl" >/dev/null 2>&1)
+  check "c8_l64 stream, audio" "$OUT/au8.jsonl" "$A8"
+  "$B/zf_tajweed_check$EXE" "$M" c8_l64 "$OUT/audio.txt" "$OUT/tj8.jsonl" 4 --heads all >/dev/null 2>"$OUT/tj8.err"
+  check "c8_l64 zf_tajweed.h, audio" "$OUT/tj8.jsonl" "$A8"
+fi
 rm -rf "$OUT"
 echo "$fails failing"
 exit $((fails > 0))

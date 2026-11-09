@@ -2,8 +2,10 @@ name: CI
 
 # Every push: build the engine on Linux, macOS and Windows and run the tajweed library's own tests.
 # The V4 conformance (35 clips, every output of every chunk, bit for bit) also needs the model folder,
-# which is gated on Hugging Face: it runs when the repository has an HF_TOKEN secret from an account
-# that accepted the model's licence, and is skipped (with a notice) otherwise, for example on forks.
+# which Quran Lab serves with an app key (cdn.quranlab.ai/models): it runs when the repository has a
+# QURANLAB_CI_KEY secret (an app key of an account whose access request was approved) and is skipped
+# (with a notice) otherwise, for example on forks. The variable QURANLAB_MODEL_REVISION pins the model
+# revision; without it scripts/fetch-model.py takes the current release.
 
 on:
   push:
@@ -48,19 +50,14 @@ jobs:
       - name: Conformance data
         id: data
         env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          QURANLAB_KEY: ${{ secrets.QURANLAB_CI_KEY }}
+          QURANLAB_MODEL_REVISION: ${{ vars.QURANLAB_MODEL_REVISION }}
           GH_TOKEN: ${{ github.token }}
         run: |
-          if [ -z "$HF_TOKEN" ]; then echo "::notice::no HF_TOKEN secret: V4 conformance skipped"; echo "run=0" >> "$GITHUB_OUTPUT"; exit 0; fi
+          if [ -z "$QURANLAB_KEY" ]; then echo "::notice::no QURANLAB_CI_KEY secret: V4 conformance skipped"; echo "run=0" >> "$GITHUB_OUTPUT"; exit 0; fi
           scripts/fetch-conformance-data.sh data
-          python -m pip install -q "huggingface_hub>=0.24"
-          python - <<'PY'
-          import os
-          from huggingface_hub import snapshot_download
-          snapshot_download("Quran-Lab/tajweedformer-v4", allow_patterns=["sdk/v4.0/*"], local_dir="hf",
-                            token=os.environ["HF_TOKEN"])
-          PY
+          python3 scripts/fetch-model.py model
           echo "run=1" >> "$GITHUB_OUTPUT"
       - name: V4 conformance
         if: steps.data.outputs.run == '1'
-        run: bench/v4_conformance.sh build/$PRESET hf/sdk/v4.0 data
+        run: bench/v4_conformance.sh build/$PRESET model/sdk/v4.0 data
