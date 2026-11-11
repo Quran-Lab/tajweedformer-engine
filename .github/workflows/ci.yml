@@ -1,6 +1,7 @@
 name: CI
 
-# Every push: build the engine on Linux, macOS and Windows and run the tajweed library's own tests.
+# Every push: build the engine on Linux, macOS and Windows and run its tests (ctest: the engine's own in
+# engine/tests and the tajweed library's in tajweed/tests; none needs a model file or the network).
 # The V4 conformance (35 clips, every output of every chunk, bit for bit) also needs the model folder,
 # which Quran Lab serves with an app key (cdn.quranlab.ai/models): it runs when the repository has a
 # QURANLAB_CI_KEY secret (an app key of an account whose access request was approved) and is skipped
@@ -45,7 +46,7 @@ jobs:
       - name: Release build (what an app links)
         if: runner.os != 'Windows'
         run: cmake --preset host-release && cmake --build --preset host-release
-      - name: Tajweed library tests
+      - name: Tests
         run: ctest --test-dir build/$PRESET --output-on-failure --no-tests=error
       - name: Conformance data
         id: data

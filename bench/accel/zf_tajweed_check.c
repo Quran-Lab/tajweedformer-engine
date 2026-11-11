@@ -4,18 +4,17 @@
  * every head of every chunk is fingerprinted from the stream's chunk callback, in the layout of
  * zf_set and zf_stream_check (tokens, chunks, logp_fnv, out_fnv per output per chunk), so
  * bench/v4_conformance_check.py checks it against the same expected file as the stream harness's
- * audio path. It then checks that zf_tajweed_stream_heads hands back the same bits as the chunks did,
- * and with --score SURAH:AYAH scores the take and prints the result's JSON to stderr.
+ * audio path. It then checks that zf_tajweed_stream_heads hands back the same bits as the chunks did.
  *
  * Timing: "chunk_ms" per clip is the wall time of the pushes and the finish over the chunks run.
  *
- * --heads all (the default here, so every output is checked) | scorer | <mask>: which heads the stream
+ * --heads all (the default here, so every output is checked) | default | <mask>: which heads the stream
  * computes (zf_tajweed_stream_set_heads); the heads not computed print as FNV 0, which
  * bench/v4_conformance_check.py --subset checks. Every clip also checks the decoded layer: the
  * top-1 tokens of zf_tajweed_stream_top2, collapsed as CTC (repeats, then blanks), must be the
  * greedy transcript, and runner-up and margin must agree with the log-probs.
  *
- *   zf_tajweed_check <model_dir> <context> <list.txt> <out.jsonl> [threads] [--score S:A] [--heads H]
+ *   zf_tajweed_check <model_dir> <context> <list.txt> <out.jsonl> [threads] [--heads H]
  */
 #define _POSIX_C_SOURCE 200809L
 #include <stdint.h>
@@ -86,23 +85,18 @@ static double now_ms(void) {
 
 int main(int argc, char **argv) {
   if (argc < 5) {
-    fprintf(stderr, "usage: %s <model_dir> <context> <list.txt> <out.jsonl> [threads] [--score S:A]\n", argv[0]);
+    fprintf(stderr, "usage: %s <model_dir> <context> <list.txt> <out.jsonl> [threads] [--heads H]\n", argv[0]);
     return 1;
   }
-  int surah = 0, ayah = 0, auto_ayah = 0;
   unsigned heads = ZF_TAJWEED_HEADS_ALL;
   ZfTajweedOpenOptions o = zf_tajweed_open_default_options();
   o.context = argv[2];
   for (int i = 5; i < argc; ++i) {
-    if (!strcmp(argv[i], "--score") && i + 1 < argc) {
-      if (!strcmp(argv[++i], "auto")) auto_ayah = 1;
-      else sscanf(argv[i], "%d:%d", &surah, &ayah);
-    }
-    else if (!strcmp(argv[i], "--heads") && i + 1 < argc) {
+    if (!strcmp(argv[i], "--heads") && i + 1 < argc) {
       ++i;
-      heads = !strcmp(argv[i], "scorer") ? ZF_TAJWEED_HEADS_SCORER
-              : !strcmp(argv[i], "all")  ? ZF_TAJWEED_HEADS_ALL
-                                         : (unsigned)strtoul(argv[i], NULL, 0);
+      heads = !strcmp(argv[i], "default") ? ZF_TAJWEED_HEADS_DEFAULT
+              : !strcmp(argv[i], "all")   ? ZF_TAJWEED_HEADS_ALL
+                                          : (unsigned)strtoul(argv[i], NULL, 0);
     }
     else o.threads = atoi(argv[i]);
   }
@@ -176,7 +170,7 @@ int main(int argc, char **argv) {
       }
       if (nf != h.n40 || col != nt) ++bad_top2;
     }
-    { /* top-K (API 3): k = 2 is the top-2 above, field for field; k = cols is a full stable argsort of
+    { /* top-K: k = 2 is the top-2 above, field for field; k = cols is a full stable argsort of
        * the row (insertion sort by value, highest first, equal values by the lower id), for every head
        * the stream keeps that has a ranking */
       static const unsigned kRanked[] = {ZF_TAJWEED_HEAD_LOG_PROBS, ZF_TAJWEED_HEAD_INTER1, ZF_TAJWEED_HEAD_INTER4,
@@ -242,27 +236,6 @@ int main(int argc, char **argv) {
       fprintf(out, "]");
     }
     fprintf(out, "}}\n");
-    if (auto_ayah) {
-      const char *u = strrchr(line, '_');
-      int code = u ? atoi(u + 1) : 0;
-      surah = code / 1000;
-      ayah = code % 1000;
-    }
-    if (surah > 0) {
-      ZfTajweedConfig *c = zf_tajweed_config_create(m);
-      const double ts = now_ms();
-      ZfTajweedResult *r = zf_tajweed_score(m, c, &h, surah, ayah, &err);
-      const double score_ms = now_ms() - ts;
-      if (!r) fprintf(stderr, "score: %s\n", err ? err : "?");
-      else {
-        ZfTajweedSummary sm;
-        zf_tajweed_result_summary(r, &sm);
-        fprintf(stderr, "%s: %d:%d sites %d flagged %d madd %d qalqalah %d gemination %d, %.1f ms\n", line, surah,
-                ayah, sm.n_sites, sm.n_flagged, sm.n_madd, sm.n_qalqalah, sm.n_gemination, score_ms);
-        zf_tajweed_result_free(r);
-      }
-      zf_tajweed_config_destroy(c);
-    }
     free(pcm);
   }
   fclose(list);

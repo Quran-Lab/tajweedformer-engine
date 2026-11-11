@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.24)
-project(tajweedformer_sdk DESCRIPTION "TajweedFormer engine: the exact runtime and the tajweed scorer" LANGUAGES C CXX ASM)
+project(tajweedformer_sdk DESCRIPTION "TajweedFormer engine: the exact inference runtime" LANGUAGES C CXX ASM)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
@@ -28,9 +28,16 @@ endif()
 
 # No contraction anywhere: every multiply-add rounds twice, as ARMv7's VMLA does.
 add_compile_options($<$<COMPILE_LANGUAGE:C>:-ffp-contract=off>)
-# ctest at this project's root only: a project that adds the engine with add_subdirectory(... EXCLUDE_FROM_ALL)
-# does not build the engine's tests, so it must not inherit them either
+# The tests (engine/tests, tajweed/tests): `ctest --test-dir <build dir>`. They need no model file and no
+# network. On when this is the project being built; a project that adds the engine with
+# add_subdirectory(... EXCLUDE_FROM_ALL) does not build them, so it does not get them in its own ctest either.
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+  set(ZF_TESTS_DEFAULT ON)
+else()
+  set(ZF_TESTS_DEFAULT OFF)
+endif()
+option(ZF_TESTS "Build the engine's tests and register them with ctest" ${ZF_TESTS_DEFAULT})
+if(ZF_TESTS)
   enable_testing()
 endif()
 
@@ -38,8 +45,9 @@ add_subdirectory(engine)
 if(NOT ZF_ENGINE_ONLY)
   add_subdirectory(accel)
 endif()
-# The tajweed library (calibration, expected table, layered config, scorer): portable C with no
-# dependencies; with the engine built, zf_tajweed_engine adds the streams.
+# The tajweed library, inference only (model folders, the decoded layer, the reference data reader):
+# portable C with no dependencies. zf_tajweed_inference is what an app links; with the engine built it
+# has the streams.
 option(ZF_TAJWEED "Build the tajweed library" ON)
 if(ZF_TAJWEED)
   add_subdirectory(tajweed)

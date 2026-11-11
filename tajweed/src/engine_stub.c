@@ -1,5 +1,6 @@
-/* The tajweed library without the exact engine: scoring heads from any source works, streams do not.
- * The engine glue (ENG) replaces this file with one that opens the context's engine files. */
+/* The tajweed library without the exact engine: the tokens, the calibration bytes, the decoded layer
+ * and the reference data work for heads from any source; streams do not. engine.c replaces this file
+ * in builds that have the engine. */
 #include <stddef.h>
 
 #include "internal.h"

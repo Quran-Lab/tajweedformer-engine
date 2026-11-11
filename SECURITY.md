@@ -15,7 +15,7 @@ you once a fix is released.
   `min_sdk_version` guard. A way to make an SDK load a file that its manifest does not list, or a
   manifest that Quran Lab did not sign, is a vulnerability.
 - The client side of the Quran Lab services the SDK talks to (`api.quranlab.ai`, `cdn.quranlab.ai`,
-  `portal.quranlab.ai`): signed configuration, developer keys, and the opt-in recording upload.
+  `sdk.quranlab.ai`): signed configuration, developer keys, and the opt-in recording upload.
 
 ## Supported versions
 

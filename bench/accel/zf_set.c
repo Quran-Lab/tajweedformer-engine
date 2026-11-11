@@ -12,7 +12,7 @@
  * previous clip's caches is not a stream any more, it is a continuation of the wrong audio, so the
  * reset is the one thing in this file worth checking twice.
  *
- * Output is one JSON line per clip, tokens as vocabulary ids, which is what the scorer reads.
+ * Output is one JSON line per clip, tokens as vocabulary ids.
  *
  * usage: zf_set <model.onnx> <list.txt> <threads> <out.jsonl> [--no-accel] [--warmup N]
  *        [--prefetch STEP]  run each window's front end as its frames arrive, STEP frames at a time

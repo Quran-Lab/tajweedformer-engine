@@ -14,8 +14,8 @@ output of every chunk (log_probs and the eleven heads).
 The reference is ONNX Runtime 1.28.2 (armeabi-v7a) on an ARMv7 phone with one intra-op thread,
 running the static int8 graph of the published model. The clips are the release asset
 `conformance-data-v4-1` of this repository (`scripts/fetch-conformance-data.sh`); the model folder
-is `sdk/v4.0` of Quran-Lab/tajweedformer-v4, served by Quran Lab at cdn.quranlab.ai/models to approved
-app keys (`scripts/fetch-model.py`; request access at portal.quranlab.ai/access).
+is `sdk/v4.0` of Quran-Lab/tajweedformer-v4, served by Quran Lab at cdn.quranlab.ai/models to app
+keys from sdk.quranlab.ai (`scripts/fetch-model.py`).
 
 `bench/v4_conformance.sh BUILD MODEL DATA` runs every harness at every context and prints one line
 per run; `bench/v4_conformance_check.py RUN EXPECTED` compares one run with one file.

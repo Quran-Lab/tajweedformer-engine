@@ -4,7 +4,7 @@
  * The heads come from zf/stream.h: log_probs through the chunk callback, the other eleven outputs
  * through zf_stream_last_output, already filled when the callback runs. Each chunk's rows are
  * appended to one growing array per head, so ZfTajweedHeads points at the whole take; at c16 a
- * chunk adds 8 rows at 40 ms and 16 at 20 ms. Nothing here touches a value: the scorer reads the
+ * chunk adds 8 rows at 40 ms and 16 at 20 ms. Nothing here touches a value: a caller reads the
  * engine's bits. Replaces engine_stub.c in builds that have the engine. */
 #include <stdio.h>
 #include <stdlib.h>
@@ -223,10 +223,10 @@ ZfTajweedStream *zf_tajweed_stream_create(ZfTajweedModel *m, const char **error)
     if (error) *error = "the engine graph lacks the tajweed heads (not a V4 graph)";
     return NULL;
   }
-  if (zf_tajweed_stream_set_heads(s, ZF_TAJWEED_HEADS_SCORER)) {
+  if (zf_tajweed_stream_set_heads(s, ZF_TAJWEED_HEADS_DEFAULT)) {
     zf_stream_destroy(s->zs);
     free(s);
-    if (error) *error = "the engine graph lacks a head the scorer needs";
+    if (error) *error = "the engine graph lacks one of the default heads";
     return NULL;
   }
   return s;

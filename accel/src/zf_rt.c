@@ -941,7 +941,7 @@ static OrtStatus *run_standard(OrtSession *s, RtNode *n) {
 /* ---------------------------------------------------------------------------------- run */
 
 /* The nodes a Run needs: those that feed one of the outputs it asks for, as ONNX Runtime prunes a
- * graph to the requested outputs. A V4 caller that wants only the scorer's heads then skips the
+ * graph to the requested outputs. A V4 caller that wants only the default heads then skips the
  * other heads' linears, softmaxes and copies (inter4, id, conf, the attribute heads); the nodes that
  * do run are the same nodes on the same inputs, so every output computed is the same bits as when
  * everything runs. Every node with carried state (the encoder layers' caches, the front end) feeds

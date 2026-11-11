@@ -52,3 +52,9 @@ if(WIN32 AND NOT MINGW)
   target_compile_definitions(zf_engine PUBLIC _CRT_SECURE_NO_WARNINGS _CRT_NONSTDC_NO_DEPRECATE
                                                strtok_r=strtok_s)
 endif()
+
+# The engine's tests (engine/tests, run by ctest): built when this repository is the project being
+# built, not when another project adds the engine as a subdirectory.
+if(ZF_TESTS)
+  add_subdirectory(tests)
+endif()

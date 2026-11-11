@@ -1,12 +1,13 @@
-/* The model folder: calibration.json, tokens.txt, expected_tj3.zfx and, with load_engine, the
- * context's engine files (engine glue). */
+/* The model folder: tokens.txt, calibration.json's bytes when the folder has one (handed over as
+ * data, never parsed) and, with load_engine, the context's engine files (engine glue). The reference
+ * data (expected_tj3.zfx) is not read here: reference.c is a reader of its own. */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "internal.h"
 
-/* the same rule as zf/stream.h's ZF_NO_PIN_DEFAULT (the scorer builds without the engine's headers) */
+/* the same rule as zf/stream.h's ZF_NO_PIN_DEFAULT (this file builds without the engine's headers) */
 /* The pinning default by platform: phones pin (the pool was tuned for big.LITTLE cores, one stream per
  * app), every other build does not (desktop, server, WebAssembly: a pinned caller thread shares one core
  * with everything else the machine runs; on a busy Windows host a pinned stream ran 18 ms a chunk
@@ -25,6 +26,9 @@
 #define ZF_TJ_NO_PIN_DEFAULT 1 /* Windows, Linux, WebAssembly */
 #endif
 
+const char *zf_tajweed_version(void) { return ZF_TAJWEED_VERSION; }
+int zf_tajweed_api_version(void) { return ZF_TAJWEED_API_VERSION; }
+
 ZfTajweedOpenOptions zf_tajweed_open_default_options(void) {
   ZfTajweedOpenOptions o;
   memset(&o, 0, sizeof o);
@@ -36,6 +40,38 @@ ZfTajweedOpenOptions zf_tajweed_open_default_options(void) {
   o.batch = 1;
   o.no_pin = ZF_TJ_NO_PIN_DEFAULT;
   return o;
+}
+
+unsigned char *zf_tj_read_file(const char *path, size_t *size) {
+  FILE *f = fopen(path, "rb");
+  if (!f) return NULL;
+  unsigned char *buf = NULL;
+  size_t n = 0, cap = 0;
+  for (;;) {
+    if (cap - n < 65536) {
+      size_t nc = cap ? cap * 2 : 65536;
+      unsigned char *nb = (unsigned char *)realloc(buf, nc + 1);
+      if (!nb) {
+        free(buf);
+        fclose(f);
+        return NULL;
+      }
+      buf = nb;
+      cap = nc;
+    }
+    size_t r = fread(buf + n, 1, cap - n, f);
+    n += r;
+    if (r == 0) break;
+  }
+  int err = ferror(f);
+  fclose(f);
+  if (err) {
+    free(buf);
+    return NULL;
+  }
+  buf[n] = 0;
+  *size = n;
+  return buf;
 }
 
 static char *join(const char *dir, const char *name) {
@@ -55,6 +91,20 @@ static unsigned char *read_in(const char *dir, const char *name, size_t *size) {
   unsigned char *d = zf_tj_read_file(p, size);
   free(p);
   return d;
+}
+
+/* A context is the name of a folder of the model, never a path: letters, digits, '_', '-' and '.',
+ * not starting with a dot, at most 63 bytes. */
+static int context_ok(const char *c) {
+  const size_t n = strlen(c);
+  if (n == 0 || n > 63 || c[0] == '.') return 0;
+  for (size_t i = 0; i < n; ++i) {
+    const char ch = c[i];
+    if (!((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9') || ch == '_' ||
+          ch == '-' || ch == '.'))
+      return 0;
+  }
+  return 1;
 }
 
 /* tokens.txt: "<name> <id>" per line, ids 0 .. 37 in order */
@@ -102,7 +152,8 @@ void zf_tajweed_model_close(ZfTajweedModel *m) {
   if (!m) return;
   if (m->engine) zf_tajweed__engine_close(m);
   for (int i = 0; i < ZF_TAJWEED_VOCAB; ++i) free(m->token_names[i]);
-  zf_tj_expected_free(&m->exp);
+  free(m->calibration);
+  free(m->context);
   free(m);
 }
 
@@ -125,6 +176,14 @@ ZfTajweedModel *zf_tajweed_model_open(const char *model_dir, const ZfTajweedOpen
     *error = "model_dir is NULL";
     return NULL;
   }
+  if (o.context && !context_ok(o.context)) {
+    *error = "options.context is not the name of a context folder";
+    return NULL;
+  }
+  if (o.load_engine && !o.context) {
+    *error = "options.context is required with load_engine (the manifest's default_context names the default)";
+    return NULL;
+  }
   ZfTajweedModel *m = (ZfTajweedModel *)calloc(1, sizeof *m);
   if (!m) {
     *error = "out of memory";
@@ -132,53 +191,31 @@ ZfTajweedModel *zf_tajweed_model_open(const char *model_dir, const ZfTajweedOpen
   }
   m->options = o;
   m->options.context = NULL; /* the caller's string is not kept */
-  size_t n;
-  unsigned char *d = read_in(model_dir, "calibration.json", &n);
-  if (!d) {
-    *error = "cannot read calibration.json";
-    goto fail;
+  if (o.context) {
+    const size_t len = strlen(o.context);
+    m->context = (char *)malloc(len + 1);
+    if (!m->context) {
+      *error = "out of memory";
+      goto fail;
+    }
+    memcpy(m->context, o.context, len + 1);
   }
-  int rc = zf_tj_calibration_parse((const char *)d, n, &m->cal, error);
-  free(d);
-  if (rc) goto fail;
-  const char *ctx = o.context ? o.context : m->cal.default_context;
-  m->ctx = zf_tj_calibration_context(&m->cal, ctx);
-  if (!m->ctx) {
-    *error = "the context asked for is not in calibration.json";
-    goto fail;
-  }
-  m->ctx_index = (int)(m->ctx - m->cal.ctx);
   /* tokens */
-  d = read_in(model_dir, "tokens.txt", &n);
+  size_t n;
+  unsigned char *d = read_in(model_dir, "tokens.txt", &n);
   if (!d) {
     *error = "cannot read tokens.txt";
     goto fail;
   }
-  unsigned char sha[32];
-  zf_tj_sha256(d, n, sha);
-  rc = parse_tokens(m, d, n, error);
+  int rc = parse_tokens(m, d, n, error);
   free(d);
   if (rc) goto fail;
-  if (m->cal.has_tokens_sha && memcmp(sha, m->cal.tokens_sha, 32)) {
-    *error = "tokens.txt does not match calibration.json's tokens_sha256";
-    goto fail;
-  }
-  /* the expected table */
-  d = read_in(model_dir, "expected_tj3.zfx", &n);
-  if (!d) {
-    *error = "cannot read expected_tj3.zfx";
-    goto fail;
-  }
-  if (zf_tj_expected_load(d, n, &m->exp, error)) {
-    free(d);
-    goto fail;
-  }
-  if (memcmp(m->exp.tokens_sha, sha, 32)) {
-    *error = "expected_tj3.zfx was built against another tokens.txt";
-    goto fail;
-  }
+  /* calibration.json: its bytes for zf_tajweed_model_calibration when the folder has one. Not parsed,
+   * not required. */
+  m->calibration = read_in(model_dir, "calibration.json", &m->calibration_size);
+  if (!m->calibration) m->calibration_size = 0;
   if (o.load_engine) {
-    char *cdir = join(model_dir, m->ctx->name);
+    char *cdir = join(model_dir, m->context);
     if (!cdir) {
       *error = "out of memory";
       goto fail;
@@ -187,47 +224,19 @@ ZfTajweedModel *zf_tajweed_model_open(const char *model_dir, const ZfTajweedOpen
     free(cdir);
     if (rc) goto fail;
   }
-  /* the backend for calibration's backend_overrides */
-  strcpy(m->backend, m->engine ? "int8" : "fp32");
-  m->backend_index = -1;
-  for (int i = 0; i < m->ctx->n_backends; ++i)
-    if (!strcmp(m->ctx->backend[i], m->backend)) m->backend_index = i;
   return m;
 fail:
   zf_tajweed_model_close(m);
   return NULL;
 }
 
-const char *zf_tajweed_model_id(const ZfTajweedModel *m) { return m ? m->cal.model_id : NULL; }
-const char *zf_tajweed_model_context(const ZfTajweedModel *m) { return m ? m->ctx->name : NULL; }
-const char *zf_tajweed_model_context_at(const ZfTajweedModel *m, int index) {
-  return m && index >= 0 && index < m->cal.n_contexts ? m->cal.ctx[index].name : NULL;
-}
-const char *zf_tajweed_model_default_context(const ZfTajweedModel *m) { return m ? m->cal.default_context : NULL; }
+const char *zf_tajweed_model_context(const ZfTajweedModel *m) { return m ? m->context : NULL; }
 int zf_tajweed_model_chunk_ms(const ZfTajweedModel *m) { return m && m->engine ? m->chunk_ms : 0; }
 const char *zf_tajweed_token_name(const ZfTajweedModel *m, int id) {
   return m && id >= 0 && id < ZF_TAJWEED_VOCAB ? m->token_names[id] : NULL;
 }
 
-int zf_tajweed_ayah_count(const ZfTajweedModel *m, int surah) {
-  if (!m || surah < 1 || surah > m->exp.n_surah) return 0;
-  return m->exp.surah_first[surah] - m->exp.surah_first[surah - 1];
-}
-
-int zf_tajweed_expected_tokens(const ZfTajweedModel *m, int surah, int ayah, const int **tokens) {
-  if (!m) return -1;
-  int a = zf_tj_expected_index(&m->exp, surah, ayah);
-  if (a < 0) return -1;
-  if (tokens) *tokens = m->exp.tok + m->exp.a_tok_off[a];
-  return m->exp.a_n_tok[a];
-}
-
-int zf_tajweed_expected_words(const ZfTajweedModel *m, int surah, int ayah, const int **word_of_token,
-                              int *n_words) {
-  if (!m) return -1;
-  int a = zf_tj_expected_index(&m->exp, surah, ayah);
-  if (a < 0) return -1;
-  if (word_of_token) *word_of_token = m->exp.word + m->exp.a_tok_off[a];
-  if (n_words) *n_words = m->exp.a_n_words[a];
-  return m->exp.a_n_tok[a];
+const void *zf_tajweed_model_calibration(const ZfTajweedModel *m, size_t *size) {
+  if (size) *size = m && m->calibration ? m->calibration_size : 0;
+  return m ? m->calibration : NULL;
 }
