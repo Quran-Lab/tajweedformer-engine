@@ -1,0 +1,29 @@
+name: Feedback, or just a word
+description: What went well, what was confusing, what you are building, or a thank-you. It does not have to be a report.
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Write it the way you would say it. A sentence is enough.
+        This issue is public. Leave out keys, tokens, and anything that came from a learner.
+  - type: textarea
+    id: feedback
+    attributes:
+      label: Tell us
+      description: 'Anything: what you noticed about the setup, the docs, the SDK or the portal, what your app does with it, or a kind word. If something took long, minutes and steps help.'
+    validations:
+      required: true
+  - type: input
+    id: sdk-version
+    attributes:
+      label: SDK version, if it matters
+      placeholder: "3.0.0"
+  - type: dropdown
+    id: sent-by
+    attributes:
+      label: Who wrote this?
+      options:
+        - I did
+        - My coding assistant passed on my own words
+    validations:
+      required: true

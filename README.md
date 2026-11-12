@@ -65,7 +65,7 @@ One model, one engine, the same bits on every platform. Each SDK compiles the sa
 
 | Repository | What it is | Platforms | Install |
 | - | - | - | - |
-| [tajweedformer-android](https://github.com/Quran-Lab/tajweedformer-android) | Kotlin SDK (AAR) | Android 8.0+ on arm64-v8a and armeabi-v7a, desktop JVM | Maven Central `ai.quranlab:tajweedformer:2.0.2` |
+| [tajweedformer-android](https://github.com/Quran-Lab/tajweedformer-android) | Kotlin SDK (AAR) | Android 8.0+ on arm64-v8a and armeabi-v7a, desktop JVM | Maven Central `ai.quranlab:tajweedformer:3.0.0` |
 | [tajweedformer-apple](https://github.com/Quran-Lab/tajweedformer-apple) | Swift SDK: Neural Engine (CoreML) with the exact CPU engine as fallback | iOS 15+, macOS 12+, Apple silicon | SwiftPM, `from: "3.0.0"`, product `TajweedFormer` |
 | [tajweedformer-web](https://github.com/Quran-Lab/tajweedformer-web) | WebAssembly SDK with SIMD128 | Browsers, Node 20+ | `npm install @quran-lab/tajweedformer` |
 | [tajweedformer-c](https://github.com/Quran-Lab/tajweedformer-c) | C API and server runner with x86 int8 kernels (AVX2, AVX-VNNI, AVX-512 VNNI) | Windows, Linux (x86-64) | CMake `FetchContent`, tag 3.0.0 |
@@ -184,6 +184,15 @@ Every line must read `35/35`; the script exits nonzero otherwise.
 ## More
 
 Everything in this README plus what is in each folder and the model folder's sizes is in [AGENTS.md](AGENTS.md), written for coding assistants and just as readable for you. The API is documented in its headers: `accel/include/zf/stream.h` (streaming) and `tajweed/include/zf_tajweed.h` (model folders, streams, the decoded layer, the reference data).
+
+## Problems and wishes
+
+Something does not work, something is missing, or you want to tell us how it went:
+[open an issue](https://github.com/Quran-Lab/tajweedformer-engine/issues/new/choose). There is a form for a bug, one for a
+wish and one for a word of feedback. Issues are public, so leave out keys and anything that came from a learner.
+A security problem does not go into an issue: use "Report a vulnerability" on the
+[Security tab](https://github.com/Quran-Lab/tajweedformer-engine/security). A coding assistant can file an issue for you; it
+shows you the text first.
 
 ## Licence
 

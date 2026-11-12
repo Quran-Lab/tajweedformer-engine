@@ -59,7 +59,7 @@ One model, one engine, the same bits on every platform. Each SDK compiles the sa
 
 | Repository | What it is | Platforms | Install |
 | - | - | - | - |
-| [tajweedformer-android](https://github.com/Quran-Lab/tajweedformer-android) | Kotlin SDK (AAR) | Android 8.0+ on arm64-v8a and armeabi-v7a, desktop JVM | Maven Central `ai.quranlab:tajweedformer:2.0.2` |
+| [tajweedformer-android](https://github.com/Quran-Lab/tajweedformer-android) | Kotlin SDK (AAR) | Android 8.0+ on arm64-v8a and armeabi-v7a, desktop JVM | Maven Central `ai.quranlab:tajweedformer:3.0.0` |
 | [tajweedformer-apple](https://github.com/Quran-Lab/tajweedformer-apple) | Swift SDK: Neural Engine (CoreML) with the exact CPU engine as fallback | iOS 15+, macOS 12+, Apple silicon | SwiftPM, `from: "3.0.0"`, product `TajweedFormer` |
 | [tajweedformer-web](https://github.com/Quran-Lab/tajweedformer-web) | WebAssembly SDK with SIMD128 | Browsers, Node 20+ | `npm install @quran-lab/tajweedformer` |
 | [tajweedformer-c](https://github.com/Quran-Lab/tajweedformer-c) | C API and server runner with x86 int8 kernels (AVX2, AVX-VNNI, AVX-512 VNNI) | Windows, Linux (x86-64) | CMake `FetchContent`, tag 3.0.0 |
@@ -193,6 +193,15 @@ Every line must read `35/35`; the script exits nonzero otherwise.
 `frontend.zfw` (1.19 MB) at the top, and per context only the graph and its geometry tensors (`frames.zfw`,
 0.3 to 0.7 MB). The CPU profile every SDK downloads for the default context is 56.5 MB gzip (73.5 MB on disk);
 each further context adds about 0.85 MB.
+
+## Problems and wishes
+
+Something does not work, something is missing, or you want to tell us how it went:
+[open an issue](https://github.com/Quran-Lab/tajweedformer-engine/issues/new/choose). There is a form for a bug, one for a
+wish and one for a word of feedback. Issues are public, so leave out keys and anything that came from a learner.
+A security problem does not go into an issue: use "Report a vulnerability" on the
+[Security tab](https://github.com/Quran-Lab/tajweedformer-engine/security). A coding assistant can file an issue for you; it
+shows you the text first.
 
 ## Licence
 

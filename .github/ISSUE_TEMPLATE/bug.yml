@@ -1,0 +1,75 @@
+name: Bug report
+description: Something does not work, or does not do what the docs say.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This issue is public. Leave out keys, tokens, and anything that came from a learner (recordings, names).
+        A coding assistant may file this for you: it shows you the text first and files it only after your yes.
+  - type: dropdown
+    id: about
+    attributes:
+      label: What is it about?
+      options:
+        - The SDK in this repository
+        - What the model returns
+        - The docs
+        - The setup prompt or the skill for coding assistants
+        - The developer portal (sdk.quranlab.ai)
+        - The API or the model download
+        - Something else
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What you did and what you saw. An error code or message as it was printed helps most.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: How can we see it ourselves?
+      description: The shortest steps or code that show it. Only code you are happy to make public.
+  - type: input
+    id: sdk-version
+    attributes:
+      label: SDK version
+      placeholder: "3.0.0"
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Device, system and build tools
+      placeholder: "Pixel 8, Android 15, Android Studio 2026.1; or Chrome 142 on Windows 11"
+  - type: textarea
+    id: diagnose
+    attributes:
+      label: Output of diagnose(), if your SDK has it
+      description: It holds no key. Remove anything you do not want public, such as your app's identifier.
+      render: json
+  - type: dropdown
+    id: sent-by
+    attributes:
+      label: Who wrote this?
+      options:
+        - I did
+        - My coding assistant, and I read it before it was sent
+    validations:
+      required: true
+  - type: checkboxes
+    id: public-ok
+    attributes:
+      label: Before you send
+      options:
+        - label: There is no key, token or learner recording in this issue.
+          required: true

@@ -31,9 +31,17 @@ jobs:
       - name: Tools (Windows)
         if: runner.os == 'Windows'
         run: choco install ninja -y --no-progress
-      - name: Tools (Linux)
+      - name: Tools (Linux; the runner image has ninja, the install is only for an image that lacks it)
         if: runner.os == 'Linux'
-        run: sudo apt-get install -y ninja-build
+        run: |
+          command -v ninja && exit 0
+          for try in 1 2 3; do
+            timeout 120 sudo apt-get install -y -o Acquire::Retries=2 ninja-build && exit 0
+            echo "::warning::apt attempt $try failed (the package mirror did not answer)"
+            sleep 20
+          done
+          echo "::error::ninja is not on this runner and no package mirror answered in three tries"
+          exit 1
       - name: Tools (macOS)
         if: runner.os == 'macOS'
         run: brew list ninja >/dev/null 2>&1 || brew install ninja

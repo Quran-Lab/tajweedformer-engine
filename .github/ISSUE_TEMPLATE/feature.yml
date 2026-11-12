@@ -1,0 +1,50 @@
+name: Feature request
+description: Something you want to build and cannot today.
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This issue is public. Leave out keys, tokens, and anything that came from a learner.
+  - type: dropdown
+    id: about
+    attributes:
+      label: What is it about?
+      options:
+        - The SDK in this repository
+        - What the model returns
+        - The docs
+        - The setup prompt or the skill for coding assistants
+        - The developer portal (sdk.quranlab.ai)
+        - The API or the model download
+        - Something else
+    validations:
+      required: true
+  - type: textarea
+    id: want
+    attributes:
+      label: What do you want to build?
+      description: The thing in your app, in your own words. That tells us more than the name of a function.
+    validations:
+      required: true
+  - type: textarea
+    id: blocked
+    attributes:
+      label: What stops you today?
+      description: What you tried and where it ended.
+    validations:
+      required: true
+  - type: input
+    id: sdk-version
+    attributes:
+      label: SDK version
+      placeholder: "3.0.0"
+  - type: dropdown
+    id: sent-by
+    attributes:
+      label: Who wrote this?
+      options:
+        - I did
+        - My coding assistant, and I read it before it was sent
+    validations:
+      required: true

@@ -1,0 +1,9 @@
+# The issue forms of this repository (written by the release tooling: the same four in every SDK repository).
+blank_issues_enabled: false
+contact_links:
+  - name: A security problem
+    url: https://github.com/Quran-Lab/tajweedformer-engine/security/policy
+    about: Never in a public issue. The Security tab of the repository has "Report a vulnerability", which is private.
+  - name: Docs and setup
+    url: https://sdk.quranlab.ai/docs
+    about: Quick starts, keys, the model's output, sharing, and the prompt for your coding assistant.
