@@ -52,7 +52,7 @@ platform, or to check a build against the conformance suite.
 - **One source of truth.** Every SDK pins this repository as a submodule and compiles it, so iOS, Android, the web, Windows and Linux all run this code.
 - **Porting has a finish line.** Bring a C11 compiler and CMake. When every line of the conformance run reads `35/35`, your port matches the reference bit for bit.
 - **Offline by design.** Nothing in the engine talks to a network: you feed it audio and a model folder, and it hands back results on the device.
-- **Free, and it stays free.** Quran Lab is a non-profit waqf: the engine, the SDKs and the models are never sold. The licence, NPL-1.2, asks three things: no paywall on model features, no results presented as rulings, and show the notice.
+- **Free, and it stays free.** Quran Lab is a non-profit waqf: the engine, the SDKs and the models are never sold. The licence, NPL-1.3, asks three things: no paywall on model features, no results presented as rulings, and no training of other models on the model or its outputs.
 
 ## Built for AI developers
 
@@ -173,7 +173,7 @@ against the exact engine, never the other way round.
 ```sh
 cmake --preset host-dev && cmake --build --preset host-dev
 scripts/fetch-conformance-data.sh data          # the 35 clips (this repository's release assets)
-# the model folder sdk/v4.0 from Quran Lab: get access at sdk.quranlab.ai (NPL-1.2),
+# the model folder sdk/v4.0 from Quran Lab: get access at sdk.quranlab.ai (NPL-1.3),
 # create an app key there, then
 QURANLAB_KEY=qlk_v1_... python3 scripts/fetch-model.py model
 bench/v4_conformance.sh build/host-dev model/sdk/v4.0 data
@@ -199,8 +199,8 @@ shows you the text first.
 Quran Lab is a waqf: the SDKs and the models are free to use and are never sold.
 
 The source code in this repository and the TajweedFormer model weights are released under the
-Quran-Lab No-Profit License 1.2 ([NPL-1.2](LICENSE)): use, copy, modify and build on them freely,
-but never charge for them, for access to them, or for any feature they power. The weights are not
+Quran-Lab No-Profit License 1.3 ([NPL-1.3](LICENSE)): use, copy, modify and build apps on them freely,
+but never charge for them, for access to them, or for any feature they power. Neither they nor their outputs may be used to train other models. The weights are not
 stored in this repository; Quran Lab hosts them itself and serves them to apps by
 `cdn.quranlab.ai/models` under the same licence. Get access at
 [sdk.quranlab.ai](https://sdk.quranlab.ai).

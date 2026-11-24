@@ -3,7 +3,7 @@
 
     QURANLAB_KEY=qlk_v1_... python3 scripts/fetch-model.py DIR [--revision REV] [--decode]
 
-Get access at https://sdk.quranlab.ai (NPL-1.2), create an app key on the portal, then run
+Get access at https://sdk.quranlab.ai (NPL-1.3), create an app key on the portal, then run
 this. It writes DIR/sdk/v4.0/... exactly as published: manifest.json first, then every file the manifest
 lists, each checked against its size and SHA-256 from the manifest (a mismatch stops with an error).
 --decode also writes the decoded copy of each gzip file next to it (its signed decoded size and SHA-256
