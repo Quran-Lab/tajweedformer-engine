@@ -208,8 +208,8 @@ shows you the text first.
 Quran Lab is a waqf: the SDKs and the models are free to use and are never sold.
 
 The source code in this repository and the TajweedFormer model weights are released under the
-Quran-Lab No-Profit License 1.3 ([NPL-1.3](LICENSE)): use, copy, modify and build apps on them freely,
-but never charge for them, for access to them, or for any feature they power. Neither they nor their outputs may be used to train other models. The weights are not
+Quran-Lab No-Profit License 1.3 ([NPL-1.3](LICENSE)): use the SDK, copy and modify its source code, and build apps with them freely,
+but never charge for them, for access to them, or for any feature they power. Neither they nor their outputs may be used to train other models, and the model is used only through the SDK: never extracted, converted, re-hosted or bundled. The weights are not
 stored in this repository; Quran Lab hosts them itself and serves them to apps by
 `cdn.quranlab.ai/models` under the same licence. Get access at
 [sdk.quranlab.ai](https://sdk.quranlab.ai).
